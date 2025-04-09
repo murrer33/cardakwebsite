@@ -1,0 +1,49 @@
+{
+  "name": "cardakwebsite",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Çardak - Platform for tests, photos and daily forum",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "next": "15.2.5",
+    "firebase": "^10.8.0",
+    "@heroicons/react": "^2.1.1",
+    "@hookform/resolvers": "^3.3.4",
+    "date-fns": "^3.3.1",
+    "daisyui": "^4.6.0",
+    "react-hook-form": "^7.50.0",
+    "zod": "^3.22.4",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.5",
+    "@eslint/eslintrc": "^3"
+  },
+  "author": "Çardak Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/cardakwebsite"
+  },
+  "keywords": [
+    "nextjs",
+    "react",
+    "firebase",
+    "tailwindcss",
+    "typescript"
+  ],
+  "license": "MIT"
+}
