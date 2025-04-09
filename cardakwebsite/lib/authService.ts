@@ -1,7 +1,8 @@
 import supabase from './supabaseClient';
+import { User } from './types';
 
 export const authService = {
-  async signUp(email, password, username) {
+  async signUp(email: string, password: string, username: string) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -20,7 +21,7 @@ export const authService = {
     return data;
   },
 
-  async signIn(email, password) {
+  async signIn(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -34,7 +35,7 @@ export const authService = {
     return data;
   },
 
-  async signOut() {
+  async signOut(): Promise<void> {
     const { error } = await supabase.auth.signOut();
     
     if (error) {
@@ -43,7 +44,7 @@ export const authService = {
     }
   },
 
-  async getCurrentUser() {
+  async getCurrentUser(): Promise<User | null> {
     const { data: { user }, error } = await supabase.auth.getUser();
     
     if (error) {
@@ -51,7 +52,7 @@ export const authService = {
       return null;
     }
     
-    return user;
+    return user as User;
   },
 
   async getCurrentSession() {
@@ -65,7 +66,7 @@ export const authService = {
     return session;
   },
 
-  async resetPassword(email) {
+  async resetPassword(email: string): Promise<void> {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
@@ -76,7 +77,7 @@ export const authService = {
     }
   },
 
-  async updatePassword(newPassword) {
+  async updatePassword(newPassword: string): Promise<void> {
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
@@ -87,7 +88,7 @@ export const authService = {
     }
   },
 
-  async updateUserProfile(profile) {
+  async updateUserProfile(profile: Record<string, any>): Promise<void> {
     const { error } = await supabase.auth.updateUser({
       data: profile,
     });
@@ -98,7 +99,7 @@ export const authService = {
     }
   },
 
-  onAuthStateChange(callback) {
+  onAuthStateChange(callback: (event: string, session: any) => void) {
     return supabase.auth.onAuthStateChange((event, session) => {
       callback(event, session);
     });

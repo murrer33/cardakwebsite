@@ -1,50 +1,15 @@
 import supabase from './supabaseClient';
-
-// Types (for TypeScript reference)
-/*
-export interface Test {
-  id?: string;
-  title: string;
-  description: string;
-  created_by: string;
-  created_at: Date;
-  questions: Question[];
-}
-
-export interface Question {
-  id: string;
-  type: 'multiple-choice' | 'image-based' | 'open-ended';
-  text: string;
-  image_url?: string;
-  options?: Option[];
-}
-
-export interface Option {
-  id: string;
-  text: string;
-  is_correct: boolean;
-}
-
-export interface Photo {
-  id?: string;
-  title: string;
-  url: string;
-  uploaded_by: string;
-  uploaded_at: Date;
-  likes: number;
-}
-
-export interface ForumPost {
-  id?: string;
-  username: string;
-  content: string;
-  created_at: Date;
-}
-*/
+import { 
+  Test, 
+  Question, 
+  Option,
+  Photo,
+  ForumPost
+} from './types';
 
 // Tests Service
 export const testsService = {
-  async getAllTests() {
+  async getAllTests(): Promise<Test[]> {
     const { data, error } = await supabase
       .from('tests')
       .select('*')
@@ -55,10 +20,10 @@ export const testsService = {
       throw error;
     }
     
-    return data;
+    return data as Test[];
   },
   
-  async getTestById(id) {
+  async getTestById(id: string): Promise<Test> {
     // First get the test
     const { data: test, error: testError } = await supabase
       .from('tests')
@@ -103,10 +68,10 @@ export const testsService = {
     // Combine test and questions
     test.questions = questions;
     
-    return test;
+    return test as Test;
   },
   
-  async createTest(test) {
+  async createTest(test: Test): Promise<string> {
     // First insert the test
     const { data: newTest, error: testError } = await supabase
       .from('tests')
@@ -126,42 +91,44 @@ export const testsService = {
     const testId = newTest[0].id;
     
     // Then insert each question
-    for (let i = 0; i < test.questions.length; i++) {
-      const question = test.questions[i];
-      
-      const { data: newQuestion, error: questionError } = await supabase
-        .from('questions')
-        .insert([{
-          test_id: testId,
-          type: question.type,
-          text: question.text,
-          image_url: question.image_url || null,
-          order: i
-        }])
-        .select();
-      
-      if (questionError) {
-        console.error('Error creating question:', questionError);
-        throw questionError;
-      }
-      
-      const questionId = newQuestion[0].id;
-      
-      // Insert options if applicable
-      if (question.options && question.options.length > 0) {
-        const optionsToInsert = question.options.map(option => ({
-          question_id: questionId,
-          text: option.text,
-          is_correct: option.is_correct
-        }));
+    if (test.questions) {
+      for (let i = 0; i < test.questions.length; i++) {
+        const question = test.questions[i];
         
-        const { error: optionsError } = await supabase
-          .from('options')
-          .insert(optionsToInsert);
+        const { data: newQuestion, error: questionError } = await supabase
+          .from('questions')
+          .insert([{
+            test_id: testId,
+            type: question.type,
+            text: question.text,
+            image_url: question.image_url || null,
+            order: i
+          }])
+          .select();
         
-        if (optionsError) {
-          console.error('Error creating options:', optionsError);
-          throw optionsError;
+        if (questionError) {
+          console.error('Error creating question:', questionError);
+          throw questionError;
+        }
+        
+        const questionId = newQuestion[0].id;
+        
+        // Insert options if applicable
+        if (question.options && question.options.length > 0) {
+          const optionsToInsert = question.options.map(option => ({
+            question_id: questionId,
+            text: option.text,
+            is_correct: option.is_correct
+          }));
+          
+          const { error: optionsError } = await supabase
+            .from('options')
+            .insert(optionsToInsert);
+          
+          if (optionsError) {
+            console.error('Error creating options:', optionsError);
+            throw optionsError;
+          }
         }
       }
     }
@@ -169,7 +136,7 @@ export const testsService = {
     return testId;
   },
   
-  async uploadTestImage(file, testId) {
+  async uploadTestImage(file: File, testId: string): Promise<string> {
     const fileExt = file.name.split('.').pop();
     const fileName = `${testId}/${Date.now()}.${fileExt}`;
     
@@ -196,7 +163,7 @@ export const testsService = {
 
 // Photos Service
 export const photosService = {
-  async getAllPhotos() {
+  async getAllPhotos(): Promise<Photo[]> {
     const { data, error } = await supabase
       .from('photos')
       .select('*')
@@ -207,10 +174,10 @@ export const photosService = {
       throw error;
     }
     
-    return data;
+    return data as Photo[];
   },
   
-  async uploadPhoto(photo, file) {
+  async uploadPhoto(photo: Omit<Photo, 'id' | 'url' | 'uploaded_at' | 'likes'>, file: File): Promise<string> {
     // Upload the image first
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${file.name}`;
@@ -252,7 +219,7 @@ export const photosService = {
     return data[0].id;
   },
   
-  async likePhoto(id) {
+  async likePhoto(id: string): Promise<void> {
     // First get the current likes count
     const { data: photo, error: getError } = await supabase
       .from('photos')
@@ -280,7 +247,7 @@ export const photosService = {
 
 // Forum Service
 export const forumService = {
-  async getPosts(limitCount = 50) {
+  async getPosts(limitCount: number = 50): Promise<ForumPost[]> {
     const { data, error } = await supabase
       .from('forum_posts')
       .select('*')
@@ -292,10 +259,10 @@ export const forumService = {
       throw error;
     }
     
-    return data;
+    return data as ForumPost[];
   },
   
-  async createPost(post) {
+  async createPost(post: Omit<ForumPost, 'id' | 'created_at'>): Promise<string> {
     const { data, error } = await supabase
       .from('forum_posts')
       .insert([{
